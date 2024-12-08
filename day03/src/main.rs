@@ -45,9 +45,12 @@ fn main() {
             "do()" => Instruction::Do{},
             "don't()" => Instruction::Dont{},
             _ => {
-                let a = capture[2].parse::<i64>().ok().unwrap();
-                let b = capture[3].parse::<i64>().ok().unwrap();
-                Instruction::Mul{a,b}
+                let a = capture[2].parse::<i64>().ok();
+                let b = capture[3].parse::<i64>().ok();
+                match (a, b) {
+                    (Some(x), Some(y)) => Instruction::Mul{a:x,b:y},
+                    _ => panic!("BAD NUMBERS"),
+                }
             }
         }
     })
