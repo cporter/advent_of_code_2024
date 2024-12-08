@@ -1,7 +1,6 @@
 use regex::Regex;
 use std::fmt;
-use std::io::{self, BufReader};
-use util::read_lines;
+use util::read_input;
 
 enum Instruction {
     Do,
@@ -27,7 +26,7 @@ struct Total {
 fn main() {
     let re1 = Regex::new(r"mul\((\d+),(\d+)\)").unwrap();
     let re2 = Regex::new(r"(do\(\)|don't\(\)|mul\((\d+),(\d+)\))").unwrap();
-    let lines: Vec<String> = read_lines(BufReader::new(io::stdin().lock())).collect();
+    let lines: Vec<String> = read_input().collect();
 
     let part1: i64 = lines
         .iter()

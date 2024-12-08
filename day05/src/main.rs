@@ -1,7 +1,6 @@
 use std::collections::HashMap;
-use std::io::{self, BufReader};
 
-use util::read_lines;
+use util::read_input;
 
 fn parse_ordering(s: &String) -> (i32, i32) {
     let mut stuff = s.splitn(2, "|");
@@ -14,7 +13,7 @@ fn parse_input() -> (HashMap<i32, Vec<i32>>, Vec<Vec<i32>>) {
     let mut order: HashMap<i32, Vec<i32>> = HashMap::new();
     let mut updates: Vec<Vec<i32>> = Vec::new();
     let mut seen_blank = false;
-    read_lines(BufReader::new(io::stdin().lock())).for_each(|line| {
+    for line in read_input() {
         if line.is_empty() {
             seen_blank = true;
         } else if seen_blank {
@@ -23,7 +22,7 @@ fn parse_input() -> (HashMap<i32, Vec<i32>>, Vec<Vec<i32>>) {
             let (k, v) = parse_ordering(&line);
             order.entry(k).or_insert_with(Vec::new).push(v);
         }
-    });
+    }
     (order, updates)
 }
 

@@ -1,5 +1,4 @@
-use std::io::{self, BufReader};
-use util::read_lines;
+use util::read_input;
 
 fn word(row: i32, col: i32, ri: i32, ci: i32, len: i32) -> Vec<(i32, i32)> {
     (0..len).map(|i| (row + i * ri, col + i * ci)).collect()
@@ -44,9 +43,7 @@ fn xmas(coords: &Vec<(i32, i32)>, letters: &Vec<Vec<char>>) -> bool {
 }
 
 fn main() {
-    let lines: Vec<Vec<char>> = read_lines(BufReader::new(io::stdin().lock()))
-        .map(|line| line.chars().collect())
-        .collect();
+    let lines: Vec<Vec<char>> = read_input().map(|line| line.chars().collect()).collect();
     let rows = lines.len() as i32;
     let cols = lines[0].len() as i32;
 

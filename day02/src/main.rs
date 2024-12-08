@@ -1,6 +1,4 @@
-use std::io::{self, BufReader};
-
-use util::read_lines;
+use util::read_input;
 
 fn ascending(xs: &Vec<i32>) -> bool {
     xs.windows(2)
@@ -29,7 +27,7 @@ fn descending_drop1(xs: &Vec<i32>) -> bool {
 }
 
 fn main() {
-    let lines = read_lines(BufReader::new(io::stdin().lock()));
+    let lines = read_input();
     let levels: Vec<Vec<i32>> = lines
         .into_iter()
         .map(|line| {

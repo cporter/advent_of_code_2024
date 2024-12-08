@@ -1,14 +1,13 @@
 use std::collections::HashMap;
-use std::io::{self, BufReader};
 
-use util::read_lines;
+use util::read_input;
 
 fn main() {
     let mut xs: Vec<i32> = vec![];
     let mut ys: Vec<i32> = vec![];
     let mut yc: HashMap<i32, i32> = HashMap::new();
 
-    read_lines(BufReader::new(io::stdin().lock())).for_each(|line| {
+    for line in read_input() {
         let mut split = line.split_whitespace();
         let a = split.next().and_then(|s| s.parse::<i32>().ok());
         let b = split.next().and_then(|s| s.parse::<i32>().ok());
@@ -20,7 +19,7 @@ fn main() {
             }
             (_, _) => panic!("Bad string? {}", line),
         }
-    });
+    }
 
     xs.sort();
     ys.sort();
