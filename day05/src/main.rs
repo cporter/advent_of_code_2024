@@ -27,34 +27,27 @@ fn parse_input() -> (HashMap<i32, Vec<i32>>, Vec<Vec<i32>>) {
     (order, updates)
 }
 
+fn ordered(update: &Vec<i32>, order:&HashMap<i32, Vec<i32>>) -> bool {
+    update.iter().enumerate().all(|(i, &x)| {
+        ((i+1)..update.len()).map(|j| update[j]).all(|y| {
+            match order.get(&x) {
+                Some(val) => val.contains(&y),
+                None => false
+            }
+        })
+    })
+}
+
 fn main() {
     let (order, updates) = parse_input();
     let part1 :i32 = updates.iter()
-        .filter(|update| {
-            update.iter().enumerate().all(|(i, &x)| {
-                ((i+1)..update.len()).map(|j| update[j]).all(|y| {
-                    match order.get(&x) {
-                        Some(val) => val.contains(&y),
-                        None => false
-                    }
-                })
-            })
-        })
+        .filter(|update| ordered(update, &order))
         .map(|update| update[update.len()/2])
         .sum();
     println!("part 1: {}", part1);
 
     let part2 :i32 = updates.iter()
-        .filter(|update| {
-            ! update.iter().enumerate().all(|(i, &x)| {
-                ((i+1)..update.len()).map(|j| update[j]).all(|y| {
-                    match order.get(&x) {
-                        Some(after) => after.contains(&y),
-                        None => false,
-                    }
-                })
-            })
-        })
+        .filter(|update| ! ordered(update, &order))
         .map(|update| {
             let mut with_counts:Vec<(i32,i32)> = update.iter().map(|x| {
                 let count = match order.get(x) {
