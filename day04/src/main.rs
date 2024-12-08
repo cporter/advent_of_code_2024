@@ -18,10 +18,8 @@ fn all_on_board(rows:&i32, cols:&i32, word:&Vec<(i32, i32)>) -> bool {
 }
 
 fn spells(coords: &Vec<(i32, i32)>, letters:&Vec<Vec<char>>, word: &str) -> bool {
-    let found = coords.iter().map(|(r,c)| letters[*r as usize][*c as usize]);
-    found.zip(word.chars()).all(|(a,b)| {
-        a == b
-    })
+    let found:String = coords.iter().map(|(r,c)| letters[*r as usize][*c as usize]).collect();
+    found == word
 }
 
 
@@ -35,10 +33,8 @@ const ACCEPTABLE_XMAS:  [&'static str; 4] =[
     "MMASS", "SSAMM", "MSAMS", "SMASM"
 ];
 fn xmas(coords: &Vec<(i32, i32)>, letters:&Vec<Vec<char>>) -> bool {
-    let found:Vec<char>= coords.iter().map(|(r,c)| letters[*r as usize][*c as usize]).collect();
-    ACCEPTABLE_XMAS.iter().any(|cand| {
-        cand.chars().zip(found.iter()).all(|(a,b)| a == *b)
-    })
+    let found:String = coords.iter().map(|(r,c)| letters[*r as usize][*c as usize]).collect();
+    ACCEPTABLE_XMAS.iter().any(|cand| *cand == found)
 }
 
 fn main() {
