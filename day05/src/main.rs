@@ -10,30 +10,66 @@ fn parse_ordering(s:&String) -> (i32, i32) {
     (a, b)
 }
 
-
-fn main() {
+fn parse_input() -> (HashMap<i32, Vec<i32>>, Vec<Vec<i32>>) {
     let mut order:HashMap<i32, Vec<i32>> = HashMap::new();
-    let mut update:Vec<Vec<i32>> = Vec::new();
+    let mut updates:Vec<Vec<i32>> = Vec::new();
     let mut seen_blank = false;
     read_lines(BufReader::new(io::stdin().lock())).for_each(|line| {
         if line.is_empty() {
             seen_blank = true;
         } else if seen_blank {
-            update.push(line.split(",").map(|x|x.parse::<i32>().unwrap()).collect());
+            updates.push(line.split(",").map(|x|x.parse::<i32>().unwrap()).collect());
         } else {
             let (k, v) = parse_ordering(&line);
             order.entry(k).or_insert_with(Vec::new).push(v);
         }
     });
-    let part1 :i32 = update.iter()
+    (order, updates)
+}
+
+fn main() {
+    let (order, updates) = parse_input();
+    let part1 :i32 = updates.iter()
         .filter(|update| {
             update.iter().enumerate().all(|(i, &x)| {
                 ((i+1)..update.len()).map(|j| update[j]).all(|y| {
-                    order.entry(x).or_default().contains(&y)
+                    match order.get(&x) {
+                        Some(val) => val.contains(&y),
+                        None => false
+                    }
                 })
             })
         })
         .map(|update| update[update.len()/2])
         .sum();
     println!("part 1: {}", part1);
+
+    let part2 :i32 = updates.iter()
+        .filter(|update| {
+            ! update.iter().enumerate().all(|(i, &x)| {
+                ((i+1)..update.len()).map(|j| update[j]).all(|y| {
+                    match order.get(&x) {
+                        Some(after) => after.contains(&y),
+                        None => false,
+                    }
+                })
+            })
+        })
+        .map(|update| {
+            let mut with_counts:Vec<(i32,i32)> = update.iter().map(|x| {
+                let count = match order.get(x) {
+                    Some(after) => {
+                        update.iter().filter(|y| after.contains(y)).count()
+                    },
+                    None => 0,
+                };
+                (count as i32, *x)
+            }).collect();
+            with_counts.sort_by(|(a, _), (b, _)| b.cmp(a));
+            with_counts.iter().map(|(_,x)| *x).collect::<Vec<i32>>()
+        })
+        .map(|update| update[update.len()/2])
+        .sum();
+    println!("part 2: {}", part2);
+
 }
