@@ -2,6 +2,7 @@ use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 use util::read_input;
 
+#[derive(Eq, Hash, PartialEq, Clone, Copy)]
 enum Orientation {
     UP,
     DOWN,
@@ -30,11 +31,13 @@ fn turn(o: &Orientation) -> Orientation {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 struct Coord {
     row: i32,
     col: i32,
 }
+
+type OrientedCoord = (Coord, Orientation);
 
 impl PartialEq for Coord {
     fn eq(&self, other: &Self) -> bool {
@@ -78,6 +81,11 @@ struct Board {
     cols: usize,
 }
 
+enum SimResult {
+    Escape(HashSet<Coord>),
+    Loop(HashSet<Coord>),
+}
+
 impl Board {
     fn new(board: Vec<Vec<char>>) -> Self {
         let r = board.len();
@@ -111,22 +119,32 @@ impl Board {
         }
         None
     }
-    fn next_blocked(&self, oc: Coord, o: &Orientation) -> bool {
+    fn next_blocked(&self, oc: Coord, o: &Orientation, extra_block: Option<Coord>) -> bool {
+        if self.next_out(oc, o) {
+            return false;
+        }
         let c = mv(oc, o);
+        if let Some(block) = extra_block {
+            if c == block {
+                return true;
+            }
+        }
         self.board[c.row as usize][c.col as usize] == '#'
     }
     fn next_out(&self, oc: Coord, o: &Orientation) -> bool {
         let c = mv(oc, o);
         c.row < 0 || c.col < 0 || c.row >= self.rows as i32 || c.col >= self.cols as i32
     }
-    fn show(&self, seen: &HashSet<Coord>) {
+    fn show(&self, seen: &HashSet<Coord>, extra: &HashSet<&Coord>) {
         for r in 0..self.rows {
             for c in 0..self.cols {
                 let coord = Coord {
                     row: r as i32,
                     col: c as i32,
                 };
-                if seen.contains(&coord) {
+                if extra.contains(&coord) {
+                    print!("O");
+                } else if seen.contains(&coord) {
                     print!("X");
                 } else {
                     print!("{}", self.board[r][c]);
@@ -135,24 +153,61 @@ impl Board {
             println!();
         }
     }
-}
 
+    fn sim(&self, extra_block: Option<Coord>) -> Option<SimResult> {
+        if let Some((mut guard, orig_orientation)) = self.start() {
+            let mut orientation = orig_orientation;
+            let mut seen: HashSet<OrientedCoord> = HashSet::new();
+            loop {
+                if seen.contains(&(guard, orientation)) {
+                    return Some(SimResult::Loop(
+                        seen.into_iter().map(|(c, o)| c).collect::<HashSet<Coord>>(),
+                    ));
+                }
+
+                while self.next_blocked(guard, &orientation, extra_block) {
+                    orientation = turn(&orientation);
+                }
+                seen.insert((guard, orientation));
+                if self.next_out(guard, &orientation) {
+                    return Some(SimResult::Escape(
+                        seen.into_iter().map(|(c, o)| c).collect::<HashSet<Coord>>(),
+                    ));
+                }
+                guard = mv(guard, &orientation);
+            }
+        } else {
+            None
+        }
+    }
+}
 fn main() {
     let board = Board::new(read_input().map(|line| line.chars().collect()).collect());
-    if let Some((mut guard, mut orientation)) = board.start() {
-        let mut seen: HashSet<Coord> = HashSet::new();
-        loop {
-            seen.insert(guard);
-            while board.next_blocked(guard, &orientation) {
-                orientation = turn(&orientation);
-            }
-            guard = mv(guard, &orientation);
-            if board.next_out(guard, &orientation) {
-                break;
-            }
+    match board.sim(None) {
+        Some(SimResult::Escape(seen)) => {
+            let part1 = seen.len();
+            println!("part 1: {}", part1);
+            // board.show(&seen, &HashSet::new());
+
+            let blocks = seen
+                .iter()
+                .filter(|coord| match board.sim(Some(**coord)) {
+                    Some(SimResult::Escape(_)) => false,
+                    Some(SimResult::Loop(_)) => true,
+                    None => false,
+                })
+                .collect::<HashSet<&Coord>>();
+
+            let part2 = blocks.len();
+            println!("part 2: {}", part2);
+            // board.show(&seen, &blocks);
         }
-        let part1 = seen.len();
-        println!("part 1: {}", part1);
-        // board.show(&seen);
+        Some(SimResult::Loop(_seen)) => {
+            println!("Got a loop out of the first go?");
+            // board.show(&seen);
+        }
+        None => {
+            println!("Just a plain error.");
+        }
     }
 }
