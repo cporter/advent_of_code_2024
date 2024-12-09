@@ -135,24 +135,6 @@ impl Board {
         let c = mv(oc, o);
         c.row < 0 || c.col < 0 || c.row >= self.rows as i32 || c.col >= self.cols as i32
     }
-    fn show(&self, seen: &HashSet<Coord>, extra: &HashSet<&Coord>) {
-        for r in 0..self.rows {
-            for c in 0..self.cols {
-                let coord = Coord {
-                    row: r as i32,
-                    col: c as i32,
-                };
-                if extra.contains(&coord) {
-                    print!("O");
-                } else if seen.contains(&coord) {
-                    print!("X");
-                } else {
-                    print!("{}", self.board[r][c]);
-                }
-            }
-            println!();
-        }
-    }
 
     fn sim(&self, extra_block: Option<Coord>) -> Option<SimResult> {
         if let Some((mut guard, orig_orientation)) = self.start() {
@@ -161,7 +143,7 @@ impl Board {
             loop {
                 if seen.contains(&(guard, orientation)) {
                     return Some(SimResult::Loop(
-                        seen.into_iter().map(|(c, o)| c).collect::<HashSet<Coord>>(),
+                        seen.into_iter().map(|(c, _)| c).collect::<HashSet<Coord>>(),
                     ));
                 }
 
@@ -171,7 +153,7 @@ impl Board {
                 seen.insert((guard, orientation));
                 if self.next_out(guard, &orientation) {
                     return Some(SimResult::Escape(
-                        seen.into_iter().map(|(c, o)| c).collect::<HashSet<Coord>>(),
+                        seen.into_iter().map(|(c, _)| c).collect::<HashSet<Coord>>(),
                     ));
                 }
                 guard = mv(guard, &orientation);
@@ -187,7 +169,6 @@ fn main() {
         Some(SimResult::Escape(seen)) => {
             let part1 = seen.len();
             println!("part 1: {}", part1);
-            // board.show(&seen, &HashSet::new());
 
             let blocks = seen
                 .iter()
@@ -200,11 +181,9 @@ fn main() {
 
             let part2 = blocks.len();
             println!("part 2: {}", part2);
-            // board.show(&seen, &blocks);
         }
         Some(SimResult::Loop(_seen)) => {
             println!("Got a loop out of the first go?");
-            // board.show(&seen);
         }
         None => {
             println!("Just a plain error.");
