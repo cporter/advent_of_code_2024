@@ -28,6 +28,7 @@ fn main() {
     let n = grid[0].len() as i32;
     let letters = find_letters(&grid);
     let mut stations: HashSet<(i32, i32)> = HashSet::new();
+    let mut stations2: HashSet<(i32, i32)> = HashSet::new();
 
     let grouped = letters.into_iter().chunk_by(|&(ch, _, _)| ch); // Group by the char value
 
@@ -51,6 +52,24 @@ fn main() {
             let dy = y2 - y1;
             stations.insert((x1 - dx, y1 - dy));
             stations.insert((x2 + dx, y2 + dy));
+
+            for i in 0.. {
+                let x = x1 + dx * i;
+                let y = y1 + dy * i;
+                if x < 0 || y < 0 || x >= n || y >= m {
+                    break;
+                }
+                stations2.insert((x, y));
+            }
+            // and the same thing but negative because lazy
+            for i in 0.. {
+                let x = x1 - dx * i;
+                let y = y1 - dy * i;
+                if x < 0 || y < 0 || x >= n || y >= m {
+                    break;
+                }
+                stations2.insert((x, y));
+            }
         }
     }
 
@@ -59,4 +78,6 @@ fn main() {
         .filter(|(x, y)| x >= &0 && y >= &0 && x < &n && y < &m)
         .count();
     println!("part 1: {}", part1);
+    let part2 = stations2.iter().count();
+    println!("part 2: {}", part2);
 }
