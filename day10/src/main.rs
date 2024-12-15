@@ -1,5 +1,6 @@
 use petgraph::graph::{DiGraph, NodeIndex};
 use petgraph::visit::Bfs;
+use std::collections::HashSet;
 use util::read_chargrid;
 
 #[derive(Debug)]
@@ -59,7 +60,7 @@ fn read_graph() -> G {
     g
 }
 
-fn part_1(g: &G) -> i32 {
+fn part1(g: &G) -> i32 {
     g.node_indices()
         .filter(|ni| g[*ni].val == 0)
         .map(|ni| {
@@ -75,8 +76,52 @@ fn part_1(g: &G) -> i32 {
         .sum()
 }
 
+fn dfs_helper(
+    graph: &G,
+    current: NodeIndex,
+    end: NodeIndex,
+    visited: &mut HashSet<NodeIndex>,
+    path_count: &mut i32,
+) {
+    if current == end {
+        *path_count += 1;
+        return;
+    }
+
+    visited.insert(current);
+
+    for neighbor in graph.neighbors(current) {
+        if !visited.contains(&neighbor) {
+            dfs_helper(graph, neighbor, end, visited, path_count);
+        }
+    }
+
+    visited.remove(&current);
+}
+
+fn distinct_paths(g: &G, a: &NodeIndex, b: &NodeIndex) -> i32 {
+    let mut ret = 0;
+    let mut visited: HashSet<NodeIndex> = HashSet::new();
+    dfs_helper(g, *a, *b, &mut visited, &mut ret);
+    ret
+}
+
+fn part2(g: &G) -> i32 {
+    let zeros: Vec<NodeIndex> = g.node_indices().filter(|ni| g[*ni].val == 0).collect();
+    let nines: Vec<NodeIndex> = g.node_indices().filter(|ni| g[*ni].val == 9).collect();
+
+    let mut ret = 0;
+    for z in zeros.iter() {
+        for n in nines.iter() {
+            ret += distinct_paths(g, &z, &n);
+        }
+    }
+
+    ret
+}
+
 fn main() {
     let g: G = read_graph();
-    let part1 = part_1(&g);
-    println!("part 1: {}", part1);
+    println!("part 1: {}", part1(&g));
+    println!("part 2: {}", part2(&g));
 }
