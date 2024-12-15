@@ -26,6 +26,27 @@ pub fn read_input() -> Box<dyn Iterator<Item = String>> {
     }
 }
 
-pub fn read_chargrid() -> Vec<Vec<char>> {
+pub type Grid = Vec<Vec<char>>;
+
+pub fn read_chargrid() -> Grid {
     read_input().map(|row| row.chars().collect()).collect()
+}
+
+pub type Coord = (usize, usize);
+
+pub fn neighbors(row: usize, col: usize, rows: usize, cols: usize) -> Vec<Coord> {
+    let mut ret = Vec::new();
+    if row > 0 {
+        ret.push((row - 1, col));
+    }
+    if col > 0 {
+        ret.push((row, col - 1))
+    }
+    if row < (rows - 1) {
+        ret.push((row + 1, col))
+    }
+    if col < (cols - 1) {
+        ret.push((row, col + 1))
+    }
+    ret
 }

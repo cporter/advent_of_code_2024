@@ -1,7 +1,7 @@
 use petgraph::graph::{DiGraph, NodeIndex};
 use petgraph::visit::Bfs;
 use std::collections::HashSet;
-use util::read_chargrid;
+use util::{neighbors, read_chargrid};
 
 #[derive(Debug)]
 struct NodeData {
@@ -9,23 +9,6 @@ struct NodeData {
 }
 
 type G = DiGraph<NodeData, i32>;
-
-fn neighbors(row: usize, col: usize, rows: usize, cols: usize) -> Vec<(usize, usize)> {
-    let mut ret = Vec::new();
-    if row > 0 {
-        ret.push((row - 1, col));
-    }
-    if col > 0 {
-        ret.push((row, col - 1))
-    }
-    if row < (rows - 1) {
-        ret.push((row + 1, col))
-    }
-    if col < (cols - 1) {
-        ret.push((row, col + 1))
-    }
-    ret
-}
 
 fn read_graph() -> G {
     let grid = read_chargrid();
