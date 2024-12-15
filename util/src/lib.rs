@@ -25,3 +25,7 @@ pub fn read_input() -> Box<dyn Iterator<Item = String>> {
         Box::new(reader.lines().filter_map(Result::ok))
     }
 }
+
+pub fn read_chargrid() -> Vec<Vec<char>> {
+    read_input().map(|row| row.chars().collect()).collect()
+}
