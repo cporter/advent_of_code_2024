@@ -1,0 +1,13 @@
+[package]
+name = "day11"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+util = { path = "../util" }
+
+[profile.release]
+opt-level = 3   # Maximum optimizations
+lto = true      # Enable Link Time Optimization
+panic = "abort" # Reduce binary size by aborting on panics
+debug = false   # Do not include debug symbols
